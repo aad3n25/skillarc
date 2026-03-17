@@ -44,8 +44,10 @@ export async function POST(request: Request) {
   let body: AssessmentRequest;
   try {
     const raw = await request.json() as unknown;
+    console.log('[assess:body]', JSON.stringify(raw, null, 2));
     const result = AssessmentRequestSchema.safeParse(raw);
     if (!result.success) {
+      console.log('[assess:validation]', JSON.stringify(result.error.flatten(), null, 2));
       return NextResponse.json(
         { success: false, error: 'Invalid request', details: result.error.flatten() },
         { status: 400 },
