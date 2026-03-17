@@ -5,19 +5,29 @@ type ISOTimestamp = string;
 
 // ─── career_assessments ───────────────────────────────────────────────────────
 
+// ─── users ────────────────────────────────────────────────────────────────────
+
+/** Row shape for the `users` table */
+export interface User {
+  id: string;
+  email: string;
+  created_at: ISOTimestamp;
+}
+
+// ─── career_assessments ───────────────────────────────────────────────────────
+
 /** Row shape for the `career_assessments` table */
 export interface CareerAssessment {
   id: string;
-  user_id: string | null; // null for anonymous/pre-auth submissions
-  email: string;
+  user_id: string; // FK → users.id
 
   // Raw answers stored as submitted
-  answers: Record<string, unknown>;
-  cv_path: string | null;
+  responses: Record<string, unknown>;
+  cv_file_url: string | null;
 
   // Scoring outputs — null until Claude has processed the submission
   risk_score: number | null;
-  risk_score_confidence: number | null; // 0-1 float
+  risk_score_confidence: string | null; // "HIGH" | "MODERATE" | "LOW"
   risk_score_breakdown: RiskScoreBreakdown | null;
   role_classification: string | null;
 
@@ -128,28 +138,154 @@ export interface ReportPurchase {
 }
 
 // ─── Database type map (passed to createClient<Database>()) ──────────────────
+// Uses the same conventions as Supabase CLI-generated types so that supabase-js
+// generic constraints resolve correctly.  Empty collections use the mapped-type
+// `{ [_ in never]: never }` pattern rather than `Record<string, never>`.
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string;
+          email: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+        };
+        Relationships: [];
+      };
       career_assessments: {
-        Row: CareerAssessment;
-        Insert: Omit<CareerAssessment, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<CareerAssessment, 'id' | 'created_at'>>;
+        Row: {
+          id: string;
+          user_id: string;
+          responses: Record<string, unknown>;
+          cv_file_url: string | null;
+          risk_score: number | null;
+          risk_score_confidence: string | null;
+          risk_score_breakdown: RiskScoreBreakdown | null;
+          role_classification: string | null;
+          status: AssessmentStatus;
+          free_results: FreeResults | null;
+          paid_report: PaidReport | null;
+          paid_report_qa: boolean;
+          email_sent: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          responses: Record<string, unknown>;
+          cv_file_url?: string | null;
+          risk_score?: number | null;
+          risk_score_confidence?: string | null;
+          risk_score_breakdown?: RiskScoreBreakdown | null;
+          role_classification?: string | null;
+          status?: AssessmentStatus;
+          free_results?: FreeResults | null;
+          paid_report?: PaidReport | null;
+          paid_report_qa?: boolean;
+          email_sent?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          responses?: Record<string, unknown>;
+          cv_file_url?: string | null;
+          risk_score?: number | null;
+          risk_score_confidence?: string | null;
+          risk_score_breakdown?: RiskScoreBreakdown | null;
+          role_classification?: string | null;
+          status?: AssessmentStatus;
+          free_results?: FreeResults | null;
+          paid_report?: PaidReport | null;
+          paid_report_qa?: boolean;
+          email_sent?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       career_reports: {
-        Row: CareerReport;
-        Insert: Omit<CareerReport, 'id'>;
-        Update: Partial<Omit<CareerReport, 'id'>>;
+        Row: {
+          id: string;
+          user_id: string;
+          assessment_id: string;
+          report_content: PaidReport;
+          generated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          assessment_id: string;
+          report_content: PaidReport;
+          generated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          assessment_id?: string;
+          report_content?: PaidReport;
+          generated_at?: string;
+        };
+        Relationships: [];
       };
       report_purchases: {
-        Row: ReportPurchase;
-        Insert: Omit<ReportPurchase, 'id' | 'created_at'>;
-        Update: Partial<Omit<ReportPurchase, 'id' | 'created_at'>>;
+        Row: {
+          id: string;
+          user_id: string;
+          assessment_id: string;
+          stripe_session_id: string;
+          amount: number;
+          currency: string;
+          status: PurchaseStatus;
+          purchased_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          assessment_id: string;
+          stripe_session_id: string;
+          amount: number;
+          currency: string;
+          status?: PurchaseStatus;
+          purchased_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          assessment_id?: string;
+          stripe_session_id?: string;
+          amount?: number;
+          currency?: string;
+          status?: PurchaseStatus;
+          purchased_at?: string | null;
+        };
+        Relationships: [];
       };
     };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
-    Enums: Record<string, never>;
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
-}
+};
