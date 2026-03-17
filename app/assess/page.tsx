@@ -95,20 +95,22 @@ function AssessmentInner() {
     try {
       const payload = {
         email: answers.email,
-        jobTitle: answers.jobTitle,
-        industry: answers.industry,
-        yearsInRole: answers.yearsInRole,
-        dailyTools: answers.dailyTools,
-        dailyToolsOther: answers.dailyToolsOther,
-        aiConcernLevel: answers.aiConcernLevel,
-        consideredCareerChange: answers.consideredCareerChange,
-        biggestConcern: answers.biggestConcern,
-        skillsToDevelop: answers.skillsToDevelop,
-        learningHoursPerWeek: answers.learningHoursPerWeek,
-        preferredLearningFormat: answers.preferredLearningFormat,
-        salaryRange: answers.salaryRange,
-        nextRolePriorities: answers.nextRolePriorities,
-        holdingBack: answers.holdingBack,
+        responses: {
+          jobTitle: answers.jobTitle,
+          industry: answers.industry,
+          yearsInRole: answers.yearsInRole,
+          dailyTools: answers.dailyTools,
+          dailyToolsOther: answers.dailyToolsOther,
+          aiConcernLevel: answers.aiConcernLevel,
+          consideredCareerChange: answers.consideredCareerChange,
+          biggestConcern: answers.biggestConcern,
+          skillsToDevelop: answers.skillsToDevelop,
+          learningHoursPerWeek: answers.learningHoursPerWeek,
+          preferredLearningFormat: answers.preferredLearningFormat,
+          salaryRange: answers.salaryRange,
+          nextRolePriorities: answers.nextRolePriorities,
+          holdingBack: answers.holdingBack,
+        },
       };
 
       const res = await fetch('/api/assess', {
